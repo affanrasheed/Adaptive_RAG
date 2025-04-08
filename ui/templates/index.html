@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive RAG System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background-color: #4361ee;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .chat-container {
+            height: 70vh;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            max-width: 80%;
+        }
+        .user-message {
+            background-color: #e9ecef;
+            margin-left: auto;
+            text-align: right;
+        }
+        .assistant-message {
+            background-color: #4361ee;
+            color: white;
+            margin-right: auto;
+        }
+        .input-area {
+            margin-top: 20px;
+        }
+        .settings-panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .details-panel {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .source-item {
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        .workflow-item {
+            border-left: 3px solid #4361ee;
+            padding-left: 10px;
+            margin-bottom: 5px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1><i class="bi bi-lightning-charge"></i> Adaptive RAG System</h1>
+            <p>An intelligent retrieval augmented generation system that adapts to your queries</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Chat area -->
+                <div class="chat-container" id="chatContainer">
+                    <!-- Messages will be displayed here -->
+                    <div class="loading" id="initialLoadMessage">
+                        <p>The system is ready. Ask a question to get started!</p>
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <div class="input-area">
+                    <div class="input-group">
+                        <input type="text" id="userInput" class="form-control" placeholder="Ask a question...">
+                        <button class="btn btn-primary" type="button" id="sendButton">
+                            <i class="bi bi-send"></i> Send
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-end mt-2">
+                        <button class="btn btn-outline-secondary btn-sm" id="clearButton">
+                            <i class="bi bi-trash"></i> Clear Chat
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Settings panel -->
+                <div class="settings-panel">
+                    <h4>Settings</h4>
+                    <div class="mb-3">
+                        <label for="temperatureSlider" class="form-label">Temperature: <span id="temperatureValue">0.0</span></label>
+                        <input type="range" class="form-range" min="0" max="1" step="0.1" value="0.0" id="temperatureSlider">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="showSourcesCheck" checked>
+                        <label class="form-check-label" for="showSourcesCheck">Show sources</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="showWorkflowCheck">
+                        <label class="form-check-label" for="showWorkflowCheck">Show workflow steps</label>
+                    </div>
+
+                    <div class="accordion" id="settingsAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingOne">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Add Document
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#settingsAccordion">
+                                <div class="accordion-body">
+                                    <div class="mb-3">
+                                        <label for="documentUrl" class="form-label">Document URL</label>
+                                        <input type="text" class="form-control" id="documentUrl" placeholder="Enter URL">
+                                    </div>
+                                    <button class="btn btn-primary btn-sm" id="addDocumentButton">Add Document</button>
+                                    <div class="mt-2" id="addDocumentResult"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Details panel -->
+                <div class="details-panel">
+                    <ul class="nav nav-tabs" id="detailsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="sources-tab" data-bs-toggle="tab" data-bs-target="#sources" type="button" role="tab" aria-controls="sources" aria-selected="true">Sources</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="workflow-tab" data-bs-toggle="tab" data-bs-target="#workflow" type="button" role="tab" aria-controls="workflow" aria-selected="false">Workflow</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button" role="tab" aria-controls="info" aria-selected="false">Info</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content p-3" id="detailsTabContent">
+                        <div class="tab-pane fade show active" id="sources" role="tabpanel" aria-labelledby="sources-tab">
+                            <div id="sourcesContent">
+                                <p>No sources available yet</p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="workflow" role="tabpanel" aria-labelledby="workflow-tab">
+                            <div id="workflowContent">
+                                <p>No workflow data available yet</p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
+                            <div id="infoContent">
+                                <h5>System Information</h5>
+                                <p>The system has been loaded with documents about:</p>
+                                <ul>
+                                    <li>Agent architectures</li>
+                                    <li>Prompt engineering</li>
+                                    <li>Adversarial attacks on LLMs</li>
+                                </ul>
+                                <p>You can add more documents using the "Add Document" section in Settings.</p>
+                            </div>
+                        </div>
+                    </div>

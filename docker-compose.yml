@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  adaptive-rag:
+    build: .
+    container_name: adaptive-rag
+    volumes:
+      - ./.env:/app/.env
+    ports:
+      - "8501:8501"  # Streamlit
+      - "7860:7860"  # Gradio
+      - "5000:5000"  # Flask
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: python ui/launch_ui.py --ui streamlit
