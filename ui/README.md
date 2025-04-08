@@ -27,9 +27,6 @@ All UIs provide the following core features:
 - Option to view workflow execution steps
 
 ### Streamlit UI
-
-![Streamlit UI](../screenshots/streamlit_ui.png)
-
 The Streamlit UI provides a simple, clean interface that focuses on ease of use. It's great for quick interactions and demonstrations.
 
 To launch manually:
@@ -39,9 +36,6 @@ streamlit run app.py
 ```
 
 ### Gradio UI
-
-![Gradio UI](../screenshots/gradio_ui.png)
-
 The Gradio UI offers a more polished look with advanced features like tabs for different information displays and a more sophisticated chat interface.
 
 To launch manually:
@@ -51,9 +45,6 @@ python gradio_app.py
 ```
 
 ### Flask UI
-
-![Flask UI](../screenshots/flask_ui.png)
-
 The Flask UI provides a traditional web application experience with a clean, responsive design.
 
 To launch manually:
